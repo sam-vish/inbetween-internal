@@ -24,11 +24,42 @@ export interface TitleResult {
 
 export type TargetScript = 'latin' | 'devanagari';
 
+export interface PremiumBriefRequest {
+  language: CaptionLanguage;
+  creatorName: string;
+  game: string | null;
+  transcript: string;
+  visionLabel: string | null;
+  label: string | null;
+  chatSample: string[];
+  titles: string[];
+  durationS: number;
+}
+
+export const PremiumBriefSchema = z.object({
+  hook: z.string().describe('On-screen hook for the first 2 seconds, in the creator language'),
+  chapter_title: z.string().describe('Short chapter title for compilations'),
+  beats: z
+    .array(
+      z.object({
+        t: z.number().describe('Seconds from the start of the clip'),
+        duration_s: z.number(),
+        kind: z.enum(['punch_in', 'callout', 'caption_emphasis', 'freeze_frame', 'text_card', 'sfx']),
+        text: z.string().describe('Callout/label text, or what to emphasize'),
+      }),
+    )
+    .describe('Motion-graphics beats in time order'),
+  style_notes: z.string().describe('Pacing, energy and visual style guidance for the editor'),
+});
+export type PremiumBrief = z.infer<typeof PremiumBriefSchema>;
+
 export interface LlmProvider {
   readonly name: string;
   titles(req: TitleRequest, cost?: CostReporter): Promise<TitleResult>;
   /** Returns one output word per input word, same order. */
   transliterate(words: string[], target: TargetScript, cost?: CostReporter): Promise<string[]>;
+  /** Script + storyboard for a premium motion-graphics edit (PRD 4.9). */
+  premiumBrief(req: PremiumBriefRequest, cost?: CostReporter): Promise<PremiumBrief>;
 }
 
 const LANGUAGE_GUIDE: Record<CaptionLanguage, string> = {
@@ -142,6 +173,39 @@ export class ClaudeLlm implements LlmProvider {
     for (const { i, t } of out.words) if (i >= 0 && i < result.length && t.trim()) result[i] = t.trim();
     return result;
   }
+
+  async premiumBrief(req: PremiumBriefRequest, cost?: CostReporter): Promise<PremiumBrief> {
+    const system = [
+      'You are the lead editor of a short-form gaming channel. You turn a raw live-stream moment into a storyboard for a motion-graphics edit (punch-ins, animated callouts such as wanted-level stars, freeze frames, text cards).',
+      'Keep beats inside the clip duration, in time order, and only reference what the transcript, game event and chat support.',
+      `On-screen text must be in ${LANGUAGE_GUIDE[req.language]}`,
+    ].join(' ');
+    const user = [
+      `Creator: ${req.creatorName}${req.game ? ` · Game: ${req.game}` : ''}`,
+      `Clip duration: ${req.durationS.toFixed(1)}s`,
+      req.label || req.visionLabel ? `What happened: ${[req.label, req.visionLabel].filter(Boolean).join(' / ')}` : null,
+      `Transcript:\n${req.transcript.slice(0, 3000) || '(no speech)'}`,
+      req.chatSample.length ? `Chat reactions:\n${req.chatSample.slice(0, 25).join('\n')}` : null,
+      req.titles.length ? `Fast-lane title options: ${req.titles.join(' | ')}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n\n');
+    // Creative planning benefits from more thinking than titles.
+    const msg = await this.client.beta.messages.parse({
+      model: this.model,
+      max_tokens: 8000,
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default',
+      output_config: { effort: 'medium', format: betaZodOutputFormat(PremiumBriefSchema) },
+      system,
+      messages: [{ role: 'user', content: user }],
+    });
+    this.report(cost, msg.usage);
+    if (msg.stop_reason === 'refusal' || msg.parsed_output == null) throw new Error(`claude premium brief failed (stop_reason=${msg.stop_reason})`);
+    const brief = msg.parsed_output as PremiumBrief;
+    brief.beats = brief.beats.filter((b) => b.t >= 0 && b.t < req.durationS).sort((a, b) => a.t - b.t);
+    return brief;
+  }
 }
 
 /** Deterministic offline LLM for tests/replay. */
@@ -161,5 +225,18 @@ export class MockLlm implements LlmProvider {
   async transliterate(words: string[], target: TargetScript): Promise<string[]> {
     if (target !== 'latin') return words;
     return words.map((w) => MockLlm.MAP[w.replace(/[.,!?]/g, '')] ?? w);
+  }
+  async premiumBrief(req: PremiumBriefRequest): Promise<PremiumBrief> {
+    const mid = Math.max(1, req.durationS / 2);
+    return {
+      hook: req.titles[0] ?? 'Wait for it…',
+      chapter_title: req.label ?? 'The moment',
+      beats: [
+        { t: 0, duration_s: 2, kind: 'text_card', text: req.titles[0] ?? 'Wait for it…' },
+        { t: mid, duration_s: 1.5, kind: 'punch_in', text: 'the moment' },
+        { t: Math.min(req.durationS - 1, mid + 2), duration_s: 2, kind: 'callout', text: req.visionLabel ?? 'chat reacts' },
+      ],
+      style_notes: 'High energy, quick punch-ins on the peak, keep captions readable.',
+    };
   }
 }

@@ -41,12 +41,12 @@ export class LocalStorage implements ObjectStorage {
     return full;
   }
 
-  async put(key: string, filePath: string) {
+  async put(key: string, filePath: string, _contentType?: string) {
     const dest = this.p(key);
     await fs.mkdir(path.dirname(dest), { recursive: true });
     await fs.copyFile(filePath, dest);
   }
-  async putBuffer(key: string, data: Buffer) {
+  async putBuffer(key: string, data: Buffer, _contentType?: string) {
     const dest = this.p(key);
     await fs.mkdir(path.dirname(dest), { recursive: true });
     await fs.writeFile(dest, data);

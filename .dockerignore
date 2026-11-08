@@ -1,0 +1,9 @@
+**/node_modules
+**/.next
+data
+apps/premium/jobs
+.git
+.env
+.env.*
+!.env.example
+coverage

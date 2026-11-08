@@ -1,0 +1,19 @@
+{
+  "name": "@inbetween/premium",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "worker": "tsx src/worker.ts",
+    "compile": "tsx src/compile.ts",
+    "run-job": "tsx src/run-job.ts"
+  },
+  "dependencies": {
+    "@inbetween/providers": "workspace:*",
+    "@inbetween/render": "workspace:*",
+    "@inbetween/shared": "workspace:*",
+    "@inbetween/worker": "workspace:*",
+    "tsx": "^4.20.0",
+    "zod": "^4.1.0"
+  }
+}

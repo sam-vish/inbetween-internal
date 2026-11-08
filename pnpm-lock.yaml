@@ -83,6 +83,27 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
+  apps/premium:
+    dependencies:
+      '@inbetween/providers':
+        specifier: workspace:*
+        version: link:../../packages/providers
+      '@inbetween/render':
+        specifier: workspace:*
+        version: link:../../packages/render
+      '@inbetween/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@inbetween/worker':
+        specifier: workspace:*
+        version: link:../worker
+      tsx:
+        specifier: ^4.20.0
+        version: 4.23.15
+      zod:
+        specifier: ^4.1.0
+        version: 4.6.7
+
   apps/worker:
     dependencies:
       '@inbetween/adapters':
