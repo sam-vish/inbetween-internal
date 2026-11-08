@@ -18,7 +18,8 @@
     "e2e": "tsx scripts/e2e.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -p tsconfig.json --noEmit && pnpm --filter @inbetween/dashboard typecheck"
+    "typecheck": "tsc -p tsconfig.json --noEmit && pnpm --filter @inbetween/dashboard typecheck",
+    "preflight": "tsx scripts/preflight.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
@@ -31,6 +32,8 @@
     "@inbetween/providers": "workspace:*",
     "@inbetween/render": "workspace:*",
     "@inbetween/shared": "workspace:*",
-    "@inbetween/worker": "workspace:*"
+    "@inbetween/worker": "workspace:*",
+    "@inbetween/adapter-youtube": "workspace:*",
+    "@anthropic-ai/sdk": "^1.6.0"
   }
 }

@@ -28,13 +28,15 @@ clips are rendered and delivered. Outputs land in `data/e2e/`.
 
 ## Running for real
 
-1. **Supabase**: create a project, apply `supabase/migrations/*.sql` (`supabase db push`), put the operator emails in
-   `public.operators` (see `supabase/seed.sql`), enable email (magic link) auth.
+1. **Supabase**: the `inbetween-live` project is created and migrated (details in `docs/RUNBOOK.md`). Copy its secret
+   key into `SUPABASE_SERVICE_KEY` and set the Auth redirect URL. For a fresh project: `supabase db push`, then add
+   operator emails to `public.operators`.
 2. **Keys**: copy `.env.example` → `.env`. Minimum for live clipping: `YOUTUBE_API_KEY`, Supabase, Redis, R2,
    one ASR key (`GROQ_API_KEY`), `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, and the OAuth/secret values.
-3. **Run**: `docker compose -f infra/docker-compose.yml --env-file .env up -d --build` (Redis + worker + dashboard),
+3. **Check**: `pnpm preflight` lists every missing key/binary/service with the fix.
+4. **Run**: `docker compose -f infra/docker-compose.yml --env-file .env up -d --build` (Redis + worker + dashboard),
    or `pnpm worker` and `pnpm dashboard` directly (needs `ffmpeg`, `streamlink`, `yt-dlp`, Noto fonts).
-4. **Onboard a client** in the dashboard (Clients → Add), send them the consent link, set the facecam crop on a live
+5. **Onboard a client** in the dashboard (Clients → Add), send them the consent link, set the facecam crop on a live
    frame. Ingest starts automatically when they go live.
 
 Tune on recorded streams without waiting for one:

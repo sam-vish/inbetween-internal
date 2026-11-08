@@ -4,10 +4,11 @@
  * Needs Redis (the queue is shared with the main worker) and the `claude`
  * CLI + HyperFrames installed on this machine.
  */
-import { loadEnv } from '@inbetween/shared';
+import { loadDotEnv, loadEnv } from '@inbetween/shared';
 import { createDeps, type PremiumJob } from '@inbetween/worker';
 import { runPremiumJob } from './premium';
 
+loadDotEnv();
 const env = loadEnv();
 if (!env.REDIS_URL) {
   console.error('premium worker needs REDIS_URL (the premium queue is shared with the main worker)');

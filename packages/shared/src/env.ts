@@ -3,7 +3,9 @@
  * Every integration is optional so the pipeline can run fully offline
  * (memory DB, local storage, mock providers) for replay and tests.
  */
+import fs from 'node:fs';
 import os from 'node:os';
+import path from 'node:path';
 import { z } from 'zod';
 
 const bool = z
@@ -101,11 +103,39 @@ let cached: Env | null = null;
 
 export function loadEnv(source: NodeJS.ProcessEnv = process.env, { fresh = false } = {}): Env {
   if (cached && !fresh && source === process.env) return cached;
-  const parsed = EnvSchema.parse(source);
+  // Blank lines like `ASR_PROVIDER=` in .env mean "unset", not "empty string".
+  const cleaned = Object.fromEntries(Object.entries(source).filter(([, v]) => v !== undefined && v.trim() !== ''));
+  const parsed = EnvSchema.parse(cleaned);
   if (source === process.env) cached = parsed;
   return parsed;
 }
 
 export function resetEnvCache(): void {
   cached = null;
+}
+
+/**
+ * Loads the nearest `.env` walking up from the working directory (pnpm runs
+ * app scripts from apps/*). Variables already set in the environment win
+ * (Docker env_file, systemd, CI). A relative DATA_DIR is resolved against the
+ * directory holding the .env, so every app shares the same data folder.
+ */
+export function loadDotEnv(start = process.cwd()): string | null {
+  let dir = path.resolve(start);
+  for (let i = 0; i < 6; i++) {
+    const file = path.join(dir, '.env');
+    if (fs.existsSync(file)) {
+      const before = { ...process.env };
+      process.loadEnvFile(file);
+      for (const [k, v] of Object.entries(before)) if (v !== undefined) process.env[k] = v;
+      const dataDir = process.env.DATA_DIR;
+      if (dataDir && !path.isAbsolute(dataDir)) process.env.DATA_DIR = path.resolve(dir, dataDir);
+      cached = null;
+      return file;
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return null;
 }

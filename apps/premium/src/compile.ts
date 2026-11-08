@@ -11,7 +11,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { compilationArgs, probeMedia, runProcess } from '@inbetween/render';
-import { formatOffset, loadEnv, storageKeys, type MomentRecord } from '@inbetween/shared';
+import { formatOffset, loadDotEnv, loadEnv, storageKeys, type MomentRecord } from '@inbetween/shared';
 import { createDeps, type WorkerDeps } from '@inbetween/worker';
 import { JOBS_DIR } from './premium';
 
@@ -80,6 +80,7 @@ export async function compileForClient(deps: WorkerDeps, clientId: string, days 
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  loadDotEnv();
   const deps = await createDeps(loadEnv());
   const days = Number(arg('days') ?? 7);
   const max = Number(arg('max') ?? 20);

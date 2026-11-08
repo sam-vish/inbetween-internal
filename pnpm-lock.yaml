@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^1.6.0
+        version: 1.6.0(zod@4.6.7)
+      '@inbetween/adapter-youtube':
+        specifier: workspace:*
+        version: link:packages/adapters/youtube
       '@inbetween/adapters':
         specifier: workspace:*
         version: link:packages/adapters/registry

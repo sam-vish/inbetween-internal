@@ -4,7 +4,7 @@
  *   WORKER_ROLE=ingest  go-live + pipelines + actions
  *   WORKER_ROLE=render  render + delivery only
  */
-import { loadEnv } from '@inbetween/shared';
+import { loadDotEnv, loadEnv } from '@inbetween/shared';
 import { ActionProcessor } from './actions/processor';
 import { createDeps } from './deps';
 import { processDeliverJob } from './delivery/deliver';
@@ -14,6 +14,7 @@ import { processRenderJob } from './render/fast-lane';
 import { Supervisor } from './supervisor';
 
 async function main() {
+  loadDotEnv();
   const env = loadEnv();
   const deps = await createDeps(env);
   const role = env.WORKER_ROLE;

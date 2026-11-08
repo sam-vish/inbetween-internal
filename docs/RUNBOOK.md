@@ -1,5 +1,27 @@
 # Runbook
 
+## Supabase project
+
+| | |
+|---|---|
+| Project | `inbetween-live` (ref `sdiypdkvksqwwxijvdaz`), org "sam-vish's Org", region ap-south-1 (Mumbai), free plan |
+| API URL | `https://sdiypdkvksqwwxijvdaz.supabase.co` |
+| Publishable key | `sb_publishable_ZY0b9ND9h1hOpgKVdDauMg_B6VJpQR8` (browser-safe) |
+| Migrations applied | `20261108125350_init`, `20261108130332_harden` (security advisors clean except the intentional deny-all on `signal_samples_*` partitions) |
+| Operators | `public.operators` — add a row per operator email (role `admin` or `operator`) |
+
+Still to do in the Supabase dashboard:
+1. **Secret key** → Project Settings → API Keys → Secret keys → copy into `SUPABASE_SERVICE_KEY` (worker + dashboard server only).
+2. **Auth → URL Configuration**: Site URL = the dashboard URL; add `<dashboard>/auth/callback` to Redirect URLs
+   (`http://localhost:3000/auth/callback` for local dev).
+3. **R2 lifecycle**: 30-day expiry on `sources/` (PRD §6), in Cloudflare.
+4. The free plan pauses projects after a week of inactivity; upgrade to Pro before clients rely on it.
+
+## Preflight
+
+`pnpm preflight` checks binaries, fonts, Supabase, Redis, R2, YouTube (page probe + 1-unit API check), OAuth config,
+ASR/vision/Claude keys, Telegram/Drive/ops alerts, and prints a fix for each failure. `--no-quota` skips the YouTube call.
+
 ## Milestone checks (PRD §7)
 
 The code for M1–M3 and the M4 plumbing is in place; each milestone's "done when" still has to be shown on real

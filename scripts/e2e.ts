@@ -35,6 +35,7 @@ const report = await runReplay({
   clientConfig: { caption_language: 'hinglish', layout_preset: 'stack', facecam_rect: { x: 70, y: 0, w: 30, h: 30 } },
   speed,
   memory: true,
+  useRedis: process.argv.includes('--redis'),
   autoApprove: true,
   dataDir,
 });

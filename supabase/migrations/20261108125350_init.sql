@@ -22,7 +22,7 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 create or replace function public.touch_updated_at() returns trigger
-language plpgsql as $$
+language plpgsql set search_path = '' as $$
 begin
   new.updated_at = now();
   return new;
@@ -162,6 +162,9 @@ create table public.signal_samples (
 ) partition by range (ts);
 
 create table public.signal_samples_default partition of public.signal_samples default;
+-- Partitions are separate tables that PostgREST would expose: lock them down like the parent.
+alter table public.signal_samples_default enable row level security;
+revoke all on public.signal_samples_default from anon, authenticated;
 
 create or replace function public.ensure_signal_partitions(days_ahead int default 7) returns int
 language plpgsql security definer set search_path = public as $$
@@ -178,6 +181,9 @@ begin
           'create table public.%I partition of public.signal_samples for values from (%L) to (%L)',
           part, d::timestamptz, (d + 1)::timestamptz
         );
+        -- Never reachable through the REST API; operators read the parent table (RLS).
+        execute format('alter table public.%I enable row level security', part);
+        execute format('revoke all on public.%I from anon, authenticated', part);
         created := created + 1;
       exception when others then
         raise notice 'could not create partition %: %', part, sqlerrm;
@@ -279,7 +285,7 @@ $$;
 
 -- Start of the current YouTube quota day (midnight America/Los_Angeles).
 create or replace function public.quota_day_start() returns timestamptz
-language sql stable as $$
+language sql stable set search_path = '' as $$
   select date_trunc('day', now() at time zone 'America/Los_Angeles') at time zone 'America/Los_Angeles';
 $$;
 
@@ -396,6 +402,11 @@ revoke all on public.operator_actions from anon;
 revoke execute on function public.claim_operator_actions(text, int) from public, anon, authenticated;
 revoke execute on function public.ib_maintenance() from public, anon, authenticated;
 revoke execute on function public.ensure_signal_partitions(int) from public, anon, authenticated;
+revoke execute on function public.sum_quota_since(timestamptz) from public, anon, authenticated;
+revoke execute on function public.sum_cost(uuid, uuid, timestamptz) from public, anon, authenticated;
+revoke execute on function public.touch_updated_at() from public, anon, authenticated;
+revoke execute on function public.is_operator() from public, anon;
+grant execute on function public.is_operator() to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- Realtime: live board + worker action nudges

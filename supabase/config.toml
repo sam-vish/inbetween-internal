@@ -1,5 +1,5 @@
 # Minimal Supabase CLI config for local development (`supabase start`).
-project_id = "inbetween"
+project_id = "sdiypdkvksqwwxijvdaz"
 
 [api]
 port = 54321

@@ -15,7 +15,7 @@ packages/signals  EWMA baselines, chat/audio/voice signals, MomentScorer
 packages/providers  ASR (Groq/Deepgram/Sarvam), vision (Gemini), LLM (Claude) + mocks
 packages/render   ffmpeg builders, vertical layouts, ASS captions
 packages/delivery Discord / Telegram / Drive / local
-supabase/         migrations (schema, RLS, RPCs, Realtime) + seed
+supabase/         migrations (schema, RLS, RPCs, Realtime) + seed; project `inbetween-live` (ref sdiypdkvksqwwxijvdaz)
 scripts/          make-synthetic, replay (VOD + chat log), e2e
 infra/            Dockerfiles + docker-compose
 ```
@@ -39,7 +39,8 @@ pnpm test                 # vitest: unit + ffmpeg integration (needs ffmpeg/ffpr
 pnpm typecheck            # root tsc + dashboard tsc
 pnpm e2e                  # offline end-to-end on a synthetic stream (~2–3 min)
 pnpm replay --video vod.mp4 --chat vod.live_chat.json --memory   # tune on a recorded VOD
-pnpm worker               # live worker (reads .env)
+pnpm preflight            # checks every binary/key/service in .env, prints fixes
+pnpm worker               # live worker (finds .env by walking up from cwd)
 pnpm dashboard            # Next dev server on :3000
 ```
 

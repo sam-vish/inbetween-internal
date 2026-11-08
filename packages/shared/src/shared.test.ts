@@ -117,3 +117,18 @@ describe('cost tracker', () => {
     expect(await db.sumCost({ streamId: 's1' })).toBeCloseTo(0.8);
   });
 });
+
+describe('env', () => {
+  it('treats blank values (as in a copied .env.example) as unset', async () => {
+    const { loadEnv } = await import('./env');
+    const env = loadEnv({ ASR_PROVIDER: '', VISION_PROVIDER: '  ', YOUTUBE_DAILY_QUOTA: '', GROQ_ASR_MODEL: '' } as NodeJS.ProcessEnv, { fresh: true });
+    expect(env.ASR_PROVIDER).toBeUndefined();
+    expect(env.VISION_PROVIDER).toBeUndefined();
+    expect(env.YOUTUBE_DAILY_QUOTA).toBe(10_000);
+    expect(env.GROQ_ASR_MODEL).toBe('whisper-large-v3-turbo');
+  });
+  it('validates provider names', async () => {
+    const { loadEnv } = await import('./env');
+    expect(() => loadEnv({ ASR_PROVIDER: 'whisper' } as NodeJS.ProcessEnv, { fresh: true })).toThrow();
+  });
+});

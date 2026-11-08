@@ -18,7 +18,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseRecordedChat } from '@inbetween/adapters';
 import { createProviders } from '@inbetween/providers';
-import { type ChatEvent, LocalStorage, loadEnv, MemoryDb, parseClientConfig, Pricing, scaledClock } from '@inbetween/shared';
+import { type ChatEvent, LocalStorage, loadDotEnv, loadEnv, MemoryDb, parseClientConfig, Pricing, scaledClock } from '@inbetween/shared';
 import {
   ActionProcessor,
   createDeps,
@@ -69,22 +69,20 @@ export async function runReplay(o: {
   name?: string;
   speed?: number;
   memory?: boolean;
+  /** With memory: still use REDIS_URL for the signal bus + BullMQ queues. */
+  useRedis?: boolean;
   autoApprove?: boolean;
   dataDir?: string;
 }): Promise<ReplayReport> {
   const t0 = Date.now();
-  try {
-    process.loadEnvFile?.('.env');
-  } catch {
-    /* no .env */
-  }
+  loadDotEnv();
   const env = loadEnv(process.env, { fresh: true });
   if (o.dataDir) env.DATA_DIR = o.dataDir;
   const overrides: DepsOverrides = {};
   if (o.memory) {
     overrides.db = new MemoryDb();
     overrides.storage = new LocalStorage(path.resolve(env.DATA_DIR, 'storage'));
-    overrides.redis = null;
+    if (!o.useRedis) overrides.redis = null;
     const pricing = new Pricing(env.PRICING_OVERRIDES_JSON);
     overrides.providers = createProviders(
       { ...env, ASR_PROVIDER: env.ASR_PROVIDER ?? 'mock', VISION_PROVIDER: env.VISION_PROVIDER ?? 'mock', LLM_PROVIDER: env.LLM_PROVIDER ?? 'mock' },

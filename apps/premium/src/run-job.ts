@@ -3,7 +3,7 @@
  *   pnpm --filter @inbetween/premium run-job <momentId> [--brief-only]
  * --brief-only prepares the job folder and brief.json without invoking Claude Code.
  */
-import { loadEnv } from '@inbetween/shared';
+import { loadDotEnv, loadEnv } from '@inbetween/shared';
 import { createDeps } from '@inbetween/worker';
 import { runPremiumJob } from './premium';
 
@@ -12,6 +12,7 @@ if (!momentId) {
   console.error('usage: run-job <momentId> [--brief-only]');
   process.exit(2);
 }
+loadDotEnv();
 const deps = await createDeps(loadEnv());
 try {
   const r = await runPremiumJob(deps, momentId, { skipClaudeCode: process.argv.includes('--brief-only') });
