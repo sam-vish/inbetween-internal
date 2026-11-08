@@ -48,6 +48,7 @@ export class QuotaLedger {
   private buffer: QuotaEventRow[] = [];
   private alerted = new Map<string, Set<string>>();
   private seeded = new Set<string>();
+  private perStream = new Map<string, number>();
   private timer: NodeJS.Timeout;
   readonly alertRatio: number;
   readonly fallbackRatio: number;
@@ -61,6 +62,11 @@ export class QuotaLedger {
 
   get dailyLimit() {
     return this.opts.dailyLimit;
+  }
+
+  /** Units this process has spent for one stream (for the stream summary / M1 check). */
+  streamUnits(streamId: string): number {
+    return this.perStream.get(streamId) ?? 0;
   }
 
   private redisKey(day: string) {
@@ -125,6 +131,7 @@ export class QuotaLedger {
       this.local.set(day, total);
     }
     this.buffer.push({ ts: Date.now(), method, units, streamId: opts.streamId ?? null });
+    if (opts.streamId) this.perStream.set(opts.streamId, (this.perStream.get(opts.streamId) ?? 0) + units);
     const mode = this.modeFor(total);
     if (mode !== 'normal') this.maybeAlert(day, mode, total);
     return total;

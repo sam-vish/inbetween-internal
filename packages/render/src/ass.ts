@@ -45,7 +45,7 @@ export const CAPTION_STYLES: Record<string, CaptionStyle> = {
     shadow: 2,
     uppercase: true,
     activeScale: 112,
-    titleFontSize: 66,
+    titleFontSize: 74,
     titleBox: '&H40000000',
   },
   clean_white: {
@@ -60,7 +60,7 @@ export const CAPTION_STYLES: Record<string, CaptionStyle> = {
     shadow: 0,
     uppercase: false,
     activeScale: 106,
-    titleFontSize: 60,
+    titleFontSize: 68,
     titleBox: '&H60000000',
   },
   hype_red: {

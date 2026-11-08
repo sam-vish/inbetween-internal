@@ -122,19 +122,14 @@ export class GeminiVision implements VisionProvider {
   }
 }
 
-/** Offline vision: brightness spikes (explosions/flashes) read as 'explosion'. Good enough for replay plumbing. */
+/**
+ * Offline vision for tests/replay. Returns `none` unless a schedule says a
+ * frame at a given stream time shows an event (the synthetic test VOD uses it).
+ */
 export class MockVision implements VisionProvider {
   readonly name = 'mock';
+  constructor(private schedule?: (jpeg: Buffer) => VisionResult | null) {}
   async classify(jpeg: Buffer): Promise<VisionResult> {
-    // Average of a sample of JPEG bytes is a crude but deterministic proxy for brightness/entropy.
-    let sum = 0;
-    const step = Math.max(1, Math.floor(jpeg.length / 2000));
-    let n = 0;
-    for (let i = 0; i < jpeg.length; i += step) {
-      sum += jpeg[i];
-      n++;
-    }
-    const avg = n ? sum / n : 0;
-    return avg > 150 ? { event: 'explosion', confidence: 0.7, detail: 'bright flash (mock)' } : { event: 'none', confidence: 0, detail: '' };
+    return this.schedule?.(jpeg) ?? { event: 'none', confidence: 0, detail: '' };
   }
 }

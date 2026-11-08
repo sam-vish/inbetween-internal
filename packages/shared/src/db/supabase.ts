@@ -97,7 +97,9 @@ export function momentFromRow(r: Row): MomentRecord {
     transcript: r.transcript ?? null,
     status: r.status,
     reason: r.reason ?? null,
+    label: r.label ?? null,
     chatSample: r.chat_sample ?? [],
+    source: r.source ?? null,
     createdAt: fromIso(r.created_at) ?? 0,
   };
 }
@@ -117,6 +119,8 @@ function momentToRow(m: Partial<MomentRecord>): Row {
   if (m.status !== undefined) r.status = m.status;
   if (m.reason !== undefined) r.reason = m.reason;
   if (m.chatSample !== undefined) r.chat_sample = m.chatSample;
+  if (m.label !== undefined) r.label = m.label;
+  if (m.source !== undefined) r.source = m.source;
   return r;
 }
 

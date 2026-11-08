@@ -94,6 +94,14 @@ export interface SignalBreakdownEntry {
 }
 export type SignalBreakdown = Partial<Record<SignalName, SignalBreakdownEntry>>;
 
+/** Where the moment's source clip (rolling-buffer segments joined, ±10s pad) lives. */
+export interface MomentSource {
+  key: string | null;
+  startTs: number;
+  endTs: number;
+  host: string | null;
+}
+
 export interface MomentRecord {
   id: string;
   streamId: string;
@@ -108,7 +116,10 @@ export interface MomentRecord {
   transcript: string | null;
   status: MomentStatus;
   reason: string | null;
+  /** Short LLM label for the dashboard. */
+  label: string | null;
   chatSample: string[];
+  source: MomentSource | null;
   createdAt: number;
 }
 

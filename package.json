@@ -25,5 +25,12 @@
     "tsx": "^4.20.0",
     "typescript": "5.9.3",
     "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@inbetween/adapters": "workspace:*",
+    "@inbetween/providers": "workspace:*",
+    "@inbetween/render": "workspace:*",
+    "@inbetween/shared": "workspace:*",
+    "@inbetween/worker": "workspace:*"
   }
 }
