@@ -210,9 +210,10 @@ export class SupabaseDb implements Db {
   readonly kind = 'supabase' as const;
   readonly sb: SupabaseClient;
 
-  constructor(url: string, serviceKey: string) {
+  constructor(url: string, serviceKey: string, fetchImpl?: typeof fetch) {
     this.sb = createClient(url, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
+      ...(fetchImpl ? { global: { fetch: fetchImpl } } : {}),
     });
   }
 
