@@ -1,0 +1,9 @@
+{
+  "id": "generic",
+  "status": "active",
+  "game": null,
+  "events": ["death", "arrest", "police_chase", "crash", "explosion", "mission_complete", "none"],
+  "prompt": "You are looking at one frame from a live gameplay stream (a facecam overlay may be present; ignore it). Decide whether the GAME shows one of these events right now: death (death/'wasted' style screen, character down), arrest (busted screen, handcuffs, police detaining the player), police_chase (police lights/cars pursuing, wanted indicator active), crash (vehicle collision or wreck), explosion (fireball, blast, smoke burst), mission_complete (mission passed / completion banner). Answer 'none' unless the event is clearly visible in this frame.",
+  "reference_images": [],
+  "notes": "Pre-launch generic prompt (PRD 4.4 v1). Per-game profiles replace it once labelled footage exists."
+}

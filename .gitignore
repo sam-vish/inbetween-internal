@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.next/
+.env
+.env.*
+!.env.example
+data/
+*.log
+coverage/
+.turbo/
+apps/premium/jobs/
+apps/dashboard/next-env.d.ts
+*.tsbuildinfo
+.DS_Store

@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "packages/**/*.ts",
+    "apps/worker/**/*.ts",
+    "apps/premium/**/*.ts",
+    "scripts/**/*.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": ["**/node_modules", "**/dist", "apps/dashboard", "apps/premium/jobs", "apps/premium/compositions"]
+}
